@@ -84,15 +84,17 @@ class StockScraper:
                 try:
                     link.click()
                 except:
-                    self.click_button(By.XPATH, "//*[contains(@rv-on-click, 'modal.close')]")
+                    self.click_button(by_method, btn_name)
             else:
                 print(f"Couldn't find button {btn_name}")
                 js_code = "arguments[0].scrollIntoView();"
                 self.driver.execute_script(js_code, link)
                 link = self.driver.find_element(by_method, btn_name)
                 ActionChains(self.driver).move_to_element(link).click(link).perform()
+            return True    
         except TimeoutException:
             print(f"Timeout waiting for {btn_name} to be clickable")
+            return False
         except ElementClickInterceptedException as e:
             print(f"ElementClickInterceptedException: {e}")
         except Exception as e:
@@ -120,11 +122,9 @@ class StockScraper:
             return date
 
     def get_contents(self, articles, page):
-        contents = []
+        # contents = []
         self.driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.HOME)
         for article in articles:
-            if article.text == "Statement of changes in beneficial ownership of securities - from 4":
-                continue
             print("Article: ", article.text)
             self.click_button(By.PARTIAL_LINK_TEXT, article.text)
             try:
@@ -152,9 +152,10 @@ class StockScraper:
             cc = cc.split("Read the full article on Seeking Alpha")[0].split("Continue reading")[0].split("For further details see:")[0]
             cc = self.split_text_at_ET(cc)
             row = [date, article.text, cc, page]
-            self.save_csv(row)
-            contents.append(row)
-            print(f'content appended: {cc[:50]} \n')
+            if len(str(cc)) > 10:
+                self.save_csv(row)
+                # contents.append(row)
+                print(f'content appended: {cc[:50]}... \n')
             self.click_button(By.XPATH, "//*[contains(@rv-on-click, 'modal.close')]")
         # return contents
 
@@ -169,6 +170,12 @@ class StockScraper:
             print(f"Found the row from the last scraping: {str(last_row[:2])} at page {str(last_row[-1])}")
             return last_row[1], int(last_row[3])
         return None, 0
+    
+    def try_next_page_again(self):
+        self.driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.END)
+        WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//*[contains(@data-type, 'next')]"))
+        )        
 
     def to_page(self, page_number):
         print(f"Processing to the last scraped page {page_number}")
@@ -177,7 +184,12 @@ class StockScraper:
             WebDriverWait(self.driver, 10).until(
                 EC.element_to_be_clickable((By.XPATH, "//*[contains(@data-type, 'next')]"))
             )
-            self.click_button(By.XPATH, "//*[contains(@data-type, 'next')]")
+            next_page = self.click_button(By.XPATH, "//*[contains(@data-type, 'next')]")
+            
+            while not next_page:
+                print("Try reaching next page again")
+                next_page = self.click_button(By.XPATH, "//*[contains(@data-type, 'next')]")         
+                                       
             self.page += 1
             print(f"Now at page {self.page}")
         return page_number
