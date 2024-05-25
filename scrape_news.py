@@ -203,11 +203,11 @@ class StockScraper:
                 self.get_contents(articles[index + 1:], self.last_row_page)
                 break
 
-    def scrape(self, max_pages=1000):
+    def scrape(self):
         self.close_ad()
         if self.last_row_title:
             self.start_from_last()
-        while self.page < max_pages:
+        while True:
             time.sleep(3)
             WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, "//*[contains(@class, 'qmod-headline')]"))
@@ -216,14 +216,22 @@ class StockScraper:
             articles = self.get_articles()
             self.get_contents(articles, self.page)
             self.driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.END)
+            # if reach the last page end the loop
+            next_button = self.driver.find_element(By.XPATH, "//*[contains(@data-type, 'next')]")
+            if 'qmod-disabled' in next_button.get_attribute('class'):
+                print("Reached the last page.")
+                break    
+            
+            # otherwise keep looping        
             WebDriverWait(self.driver, 10).until(
                 EC.element_to_be_clickable((By.XPATH, "//*[contains(@data-type, 'next')]"))
             )
             self.click_button(By.XPATH, "//*[contains(@data-type, 'next')]")
             self.page += 1
+        print("Max page reached, stop scrapping")
 
 
 if __name__ == "__main__":
-    stock = "AAPL"
+    stock = input("Please enter the stock symbol you want to scrape: ").strip().upper()
     scraper = StockScraper(stock)
     scraper.scrape()
