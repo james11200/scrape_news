@@ -24,6 +24,8 @@ class StockScraper:
         self.last_row_page = 0
         self.filename = f'{stock}_data.csv'
         self.last_row_title, self.last_row_page = self.read_last_row()
+        self.found_article_in_data = False
+
 
     def initialize_driver(self):
         user_agent = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
@@ -118,14 +120,24 @@ class StockScraper:
             date = datetime.strptime(date, "%B %d, %Y %I:%M %p")
             return date.strftime("%Y-%m-%d")
         except:
-            print(f"Date format not matching since it's {str(date)}. Skipping.")
+            print(f"Date format not matching since it's: {str(type(date))}.")
             return date
 
     def get_contents(self, articles, page):
-        # contents = []
         self.driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.HOME)
         for article in articles:
             print("Article: ", article.text)
+            if not self.found_article_in_data:
+                if os.path.exists(self.filename):
+                    with open(self.filename, 'r', newline='', encoding='utf-8') as file:
+                        reader = csv.reader(file)
+                        if any(article.text == row[1] for row in reader):
+                            print(f"Article '{article.text}' is in data, skipping.")
+                            continue
+                        else:
+                            print("Start scraping new articles...")
+                            self.found_article_in_data = True
+            
             self.click_button(By.PARTIAL_LINK_TEXT, article.text)
             try:
                 WebDriverWait(self.driver, 30).until(
@@ -156,6 +168,8 @@ class StockScraper:
                 self.save_csv(row)
                 # contents.append(row)
                 print(f'content appended: {cc[:50]}... \n')
+            else:
+                print('no content, skip saving this one')
             self.click_button(By.XPATH, "//*[contains(@rv-on-click, 'modal.close')]")
         # return contents
 
@@ -228,7 +242,7 @@ class StockScraper:
             )
             self.click_button(By.XPATH, "//*[contains(@data-type, 'next')]")
             self.page += 1
-        print("Max page reached, stop scrapping")
+        print("Max page reached, stop scraping")
 
 
 if __name__ == "__main__":
