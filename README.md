@@ -1,6 +1,8 @@
-This program uses selenium to scrape news from https://invest.cnyes.com/.
+#Stock News Scraper and Price Labeler
 
-Run the program and type in the stock you want to scrape. Ex. AAPL
+This program is a tool for scrapping stock news data from https://invest.cnyes.com/ using the selenium library.
+
+You can run the program and type the stock you want to scrape. Ex. AAPL, NVDA.
 
 The output columns include [Date, Title, Content, and Page.]
 
