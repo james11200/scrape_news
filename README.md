@@ -11,7 +11,6 @@ This program is a tool for scraping stock news articles from https://invest.cnye
 - [Usage](#usage)
   - [scrape_news.py](#scrape_newspy)
   - [label_price.py](#label_pricepy)
-- [License](#license)
 
 ## Overview
 
@@ -56,12 +55,12 @@ This script scrapes news articles from a stock's webpage on https://invest.cnyes
 
 2. Enter the stock symbol you want to scrape news for (e.g., AAPL for Apple, NVDA for Nvidia).
 
-The output will include the following columns:
+  The output will include the following columns:
 
-* Date: The date the news article was published.
-* Title: The title of the news article.
-* Content: The body text of the news article.
-* Page: The page number from the website.
+  * Date: The date the news article was published.
+  * Title: The title of the news article.
+  * Content: The body text of the news article.
+  * Page: The page number from the website.
 
 3. The scraped data will be saved as a CSV file named `<stock>_data.csv`.
 
@@ -81,6 +80,6 @@ This script processes the scraped news articles and labels them with the corresp
 
    The processed CSV will be saved with additional columns for:
 
-* Closing Price: The stock's closing price on the article's publication date.
-* Price Changes: Stock price movements following the publication.
-* Transaction Details: Relevant information about price changes over time.
+  * Closing Price: The stock's closing price on the article's publication date.
+  * Price Changes: Stock price movements following the publication.
+  * Transaction Details: Relevant information about price changes over time.
