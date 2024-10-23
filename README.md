@@ -31,7 +31,7 @@ Make sure you have [Microsoft Edge WebDriver](https://developer.microsoft.com/en
 
 1. Clone the repository:
    ```
-   git clone <repository_url>
+   git clone https://github.com/james11200/scrape_news.git
    ```
 
 2. Install the required dependencies:
